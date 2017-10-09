@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"go-mysql-protocol/util"
 )
 
 func GetSocket(host string, port int) net.Conn {
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
-		fmt.Println("Error: %s", err)
+		util.WriteErrorLog("GetSocket fail.")
 		os.Exit(1)
 	}
 
@@ -17,20 +18,34 @@ func GetSocket(host string, port int) net.Conn {
 
 }
 
-func ReadPacket(conn net.Conn) []byte {
-	buf := make([]byte, 100)
-	n, err := conn.Read(buf)
+// 返回值顺序为BodySize, Sequence, Body
+func ReadPacket(conn net.Conn) (uint32, byte, []byte) {
+	headerBuf := make([]byte, 4)
+	_, err := conn.Read(headerBuf)
 	if err != nil {
-		fmt.Println("Error: %s", err)
-		os.Exit(1)
+		return 0, 0, nil
 	}
-	fmt.Printf("\n\n====ReadContentRaw[%d]====\n[%s]\n====EndReadContent====\n", n, string(buf))
-	fmt.Printf("\n\n====ReadContent16Hex[%d]====\n[%x]\n====EndReadContent====\n", n, buf)
-	return buf[0:n]
+	bodySize := (uint32)(headerBuf[2] << 16) + uint32(headerBuf[1] << 8) + uint32(headerBuf[0])
+	sequence := headerBuf[3]
+
+	bodyBuf := make([]byte, bodySize)
+	_, err = conn.Read(bodyBuf)
+	if err != nil {
+		return 0, 0, nil
+	}
+
+	return bodySize, sequence, bodyBuf
 }
 
-func WritePacket(conn net.Conn, buf []byte) {
-	conn.Write(buf)
-	fmt.Printf("\n\n====SendContentRaw[%d]====\n[%s]\n====EndSendContent====\n", len(buf), string(buf))
-	fmt.Printf("\n\n====SendContent16Hex[%d]====\n[%x]\n====EndSendContent====\n", len(buf), buf)
+func WritePacket(conn net.Conn, sequence byte, buf []byte) {
+	l := len(buf)
+	s := []byte{}
+	s = append(s, byte(l & 0xFF))
+	s = append(s, byte((l >> 8) & 0xFF))
+	s = append(s, byte((l >> 16) & 0xFF))
+	s = append(s, sequence)
+	for _,v := range buf  {
+		s = append(s, v)
+	}
+	conn.Write(s)
 }

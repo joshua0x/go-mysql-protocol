@@ -2,13 +2,10 @@ package protocol
 
 import (
 	"go-mysql-protocol/util"
-	"net"
+	"fmt"
 )
 
 type HandsharkProtocol struct {
-	BodySize uint32
-	Sequence byte
-
 	ProtocolVersion byte
 	ServerVersion   string
 	ServerThreadID  uint32
@@ -21,30 +18,26 @@ type HandsharkProtocol struct {
 	Auth_plugin_name string
 }
 
-func ReadHandshark(conn net.Conn) HandsharkProtocol {
+func DecodeHandshark(buff []byte) HandsharkProtocol {
+	var cursor int
+	var tmp []byte
 	hs := new(HandsharkProtocol)
-	hs.BodySize = util.ReadUB3(conn)
-	hs.Sequence = util.ReadByte(conn)
 
-	hs.ProtocolVersion = util.ReadByte(conn)
-	hs.ServerVersion = string(util.ReadWithNull(conn))
-	hs.ServerThreadID = util.ReadUB4(conn)
-	hs.Seed = util.ReadWithNull(conn)
+	cursor, hs.ProtocolVersion = util.ReadByte(buff, cursor)
+	cursor, tmp = util.ReadWithNull(buff, cursor)
+	hs.ServerVersion = string(tmp)
+	cursor, hs.ServerThreadID = util.ReadUB4(buff, cursor)
+	cursor, hs.Seed = util.ReadWithNull(buff, cursor)
+	cursor, hs.ServerCapabilitiesLow = util.ReadUB2(buff, cursor)
+	cursor, hs.CharSet = util.ReadByte(buff, cursor)
+	cursor, hs.ServerStatus = util.ReadUB2(buff, cursor)
+	cursor, hs.ServerCapabilitiesHeight = util.ReadUB2(buff, cursor)
+	cursor, _ = util.ReadBytes(buff, cursor, 11)
+	cursor, hs.RestOfScrambleBuff = util.ReadWithNull(buff, cursor)
+	cursor, tmp = util.ReadWithNull(buff, cursor)
+	hs.Auth_plugin_name = string(tmp)
 
-
-
-	hs.ServerCapabilitiesLow = util.ReadUB2(conn)
-	hs.CharSet = util.ReadByte(conn)
-	hs.ServerStatus = util.ReadUB2(conn)
-
-	hs.ServerCapabilitiesHeight = util.ReadUB2(conn)
-
-
-	util.ReadBytes(conn, 11)
-
-	hs.RestOfScrambleBuff = util.ReadWithNull(conn)
-
-	hs.Auth_plugin_name = string(util.ReadWithNull(conn))
+	fmt.Printf("DecodeHanshark: %+v\n", hs)
 
 	return *hs
 }

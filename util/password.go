@@ -2,16 +2,11 @@ package util
 
 import (
 	"crypto/sha1"
-	"fmt"
 )
 
 //stage1_hash = SHA1(password), using the password that the user has entered.
 //token = SHA1(SHA1(stage1_hash), scramble) XOR stage1_hash
 func GetPassword(pass []byte, seed []byte, restOfScrambleBuff []byte) []byte {
-	fmt.Println("PASS:", pass)
-	fmt.Println("SEED:", seed)
-	fmt.Println("RESTOFSCRAMBLEBUFF:", restOfScrambleBuff)
-
 	salt := []byte{}
 	for _,v := range seed {
 		salt = append(salt, v)
@@ -23,7 +18,6 @@ func GetPassword(pass []byte, seed []byte, restOfScrambleBuff []byte) []byte {
 	sh := sha1.New()
 	sh.Write(pass)
 	stage1_hash := sh.Sum(nil)
-	fmt.Println("stage1_hash: ", stage1_hash)
 
 
 	sh.Reset()
@@ -42,6 +36,5 @@ func GetPassword(pass []byte, seed []byte, restOfScrambleBuff []byte) []byte {
 	for k,_ := range stage3_hash  {
 		ret = append(ret, stage1_hash[k] ^ stage3_hash[k])
 	}
-	fmt.Println("RET: ", ret)
-	return stage3_hash
+	return ret
 }
