@@ -2,15 +2,22 @@ package protocol
 
 import "go-mysql-protocol/util"
 
-type Rotate struct {
+type EventRotateBody struct {
 	Offset uint64
 	BinlogFileName string
 }
 
-func DecodeRotate(buf []byte) Rotate {
-	var c int = 0
-	r := new(Rotate)
-	c, r.Offset = util.ReadUB8(buf, c)
-	c, r.BinlogFileName = util.ReadString(buf, c)
+type EventRotate struct {
+	Header EventHeader
+	Body EventRotateBody
+}
+
+func DecodeRotate(buf []byte) EventRotate {
+	r := new(EventRotate)
+	r.Header = DecodeEventHeader(buf)
+
+	var c int = 20
+	c, r.Body.Offset = util.ReadUB8(buf, c)
+	c, r.Body.BinlogFileName = util.ReadString(buf, c)
 	return *r
 }

@@ -8,6 +8,8 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"go-mysql-protocol/common"
+	"go-mysql-protocol/helper"
 )
 
 func main() {
@@ -47,6 +49,8 @@ func main() {
 		util.WriteNoticeLog("register slave success")
 	}
 
+	mapTbCln := helper.GetTableInfo(conn)
+
 	//发送命令，查看binlog信息
 	tmp = protocol.EncodeQuery("show master status")
 	socket.WritePacket(conn, 0, tmp)
@@ -62,33 +66,47 @@ func main() {
 	fmt.Println("--------------start-----------")
 	//totate event
 	_, _, body = socket.ReadPacket(conn)
-	eh := protocol.DecodeEventHeader(body)
-	rotate := protocol.DecodeRotate(body[20:])
-	fmt.Printf("Totate Event Raw: %d\n", body)
-	fmt.Printf("Totate Event Header: %+v\n", eh)
-	fmt.Printf("Totate Event Body: %+v\n", rotate)
+	protocol.DecodeRotate(body)
 
 	//format description event
 	_, _, body = socket.ReadPacket(conn)
-	eh = protocol.DecodeEventHeader(body)
-	fd := protocol.DecodeFormatDescription(body[20:])
-	fmt.Printf("Format Description Raw: %d\n", body)
-	fmt.Printf("Format Description Header: %+v\n", eh)
-	fmt.Printf("Format Description Body: %+v\n", fd)
+	protocol.DecodeFormatDescription(body)
 
+	var eTableMap protocol.EventTableMap
 	for ; ;  {
-		_, _, body = socket.ReadPacket(conn)
-		if len(body) <= 0 {
-			time.Sleep(1000000000)
-			fmt.Print(".")
+		var bodySize uint32
+		bodySize, _, body = socket.ReadPacket(conn)
+		
+		//没有读到数据，那么等待读取
+		if bodySize <= 0 {
+			time.Sleep(10000000)
 			continue
 		}
-		if body[0] == 0xFF {
-			fmt.Println(string(body))
+		
+		//根据时间类型执行不同的事件解析
+		eventHeader := protocol.DecodeEventHeader(body)
+		switch eventHeader.EventType {
+		case common.EVENT_TABLE_MAP:
+			eTableMap = protocol.DecodeEventTableMap(body)
+			fmt.Println(mapTbCln[eTableMap.Body.TableName])
+
 			break
-		} else {
-			eh := protocol.DecodeEventHeader(body)
-			fmt.Printf("Event Header: %+v\n", eh)
+		case common.EVENT_WRITE_ROWS:
+			fmt.Println("event_write_rows: ", string(body))
+			fmt.Printf("event_write_rows: %d\n", body)
+			break
+		case common.EVENT_UPDATE_ROWS:
+			fmt.Println("event_update_rows: ", string(body))
+			fmt.Printf("event_update_rows: %d\n", body)
+			break
+		case common.EVENT_DELETE_ROWS:
+			fmt.Println("event_delete_rows: ", string(body))
+			fmt.Printf("event_delete_rows: %d\n", body)
+			break
+		case common.EVENT_QUERY:
+			fmt.Println("event_query: ", string(body))
+			fmt.Printf("event_query: %d\n", body)
+			break
 		}
 	}
 

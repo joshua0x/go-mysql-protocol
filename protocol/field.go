@@ -7,12 +7,12 @@ type Field struct {
 	DatabaseName string
 	TableName string
 	TablePreName string
-	RowName string
-	RowPreName string
+	ColumnName string
+	ColumnPreName string
 	CharSet uint16
-	RowLength uint32
-	RowType byte
-	RowSign uint16
+	ColumnLength uint32
+	ColumnType byte
+	ColumnSign uint16
 	IntDegree byte
 	DefaultValue string
 }
@@ -28,14 +28,14 @@ func DecodeField(buf []byte) Field {
 	cursor, tmp = util.ReadLengthString(buf, cursor)
 	f.TablePreName = string(tmp)
 	cursor, tmp = util.ReadLengthString(buf, cursor)
-	f.RowName = string(tmp)
+	f.ColumnName = string(tmp)
 	cursor, tmp = util.ReadLengthString(buf, cursor)
-	f.RowPreName = string(tmp)
+	f.ColumnPreName = string(tmp)
 	cursor, _ = util.ReadByte(buf, cursor)
 	cursor, f.CharSet = util.ReadUB2(buf, cursor)
-	cursor, f.RowLength = util.ReadUB4(buf, cursor)
-	cursor, f.RowType = util.ReadByte(buf, cursor)
-	cursor, f.RowSign = util.ReadUB2(buf, cursor)
+	cursor, f.ColumnLength = util.ReadUB4(buf, cursor)
+	cursor, f.ColumnType = util.ReadByte(buf, cursor)
+	cursor, f.ColumnSign = util.ReadUB2(buf, cursor)
 	cursor, f.IntDegree = util.ReadByte(buf, cursor)
 	cursor, _ = util.ReadUB2(buf, cursor)
 	if cursor < len(buf) {

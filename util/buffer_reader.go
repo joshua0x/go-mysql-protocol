@@ -67,6 +67,11 @@ func ReadString(buff []byte, cursor int) (int, string) {
 	return cursor, string(tmp)
 }
 
+func ReadStringWithNull(buff []byte, cursor int) (int, string) {
+	cursor, tmp := ReadWithNull(buff, cursor)
+	return cursor, string(tmp)
+}
+
 func ReadLengthString(buff []byte, cursor int) (int, string) {
 	cursor, strLen := ReadLength(buff, cursor)
 	cursor, tmp := ReadBytes(buff, cursor, int(strLen))

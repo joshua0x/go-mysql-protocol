@@ -11,6 +11,12 @@
 
 package common
 
+const EVENT_TABLE_MAP = 19
+const EVENT_WRITE_ROWS = 30
+const EVENT_UPDATE_ROWS = 31
+const EVENT_DELETE_ROWS = 32
+const EVENT_QUERY = 2
+
 /***************************************************/
 // https://dev.mysql.com/doc/internals/en/command-phase.html
 // include/my_command.h
