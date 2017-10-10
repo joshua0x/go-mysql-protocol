@@ -57,8 +57,24 @@ func main() {
 
 	p, _ := strconv.Atoi(binlogPosition)
 	body = protocol.EncodeBinlogDump(serverID, uint64(p), binlogFileName)
-	fmt.Println(string(body))
 	socket.WritePacket(conn, 0, body)
+
+	fmt.Println("--------------start-----------")
+	//totate event
+	_, _, body = socket.ReadPacket(conn)
+	eh := protocol.DecodeEventHeader(body)
+	rotate := protocol.DecodeRotate(body[20:])
+	fmt.Printf("Totate Event Raw: %d\n", body)
+	fmt.Printf("Totate Event Header: %+v\n", eh)
+	fmt.Printf("Totate Event Body: %+v\n", rotate)
+
+	//format description event
+	_, _, body = socket.ReadPacket(conn)
+	eh = protocol.DecodeEventHeader(body)
+	fd := protocol.DecodeFormatDescription(body[20:])
+	fmt.Printf("Format Description Raw: %d\n", body)
+	fmt.Printf("Format Description Header: %+v\n", eh)
+	fmt.Printf("Format Description Body: %+v\n", fd)
 
 	for ; ;  {
 		_, _, body = socket.ReadPacket(conn)
@@ -71,7 +87,9 @@ func main() {
 			fmt.Println(string(body))
 			break
 		} else {
-			fmt.Println(string(body))
+			eh := protocol.DecodeEventHeader(body)
+			fmt.Printf("Event Header: %+v\n", eh)
 		}
 	}
+
 }

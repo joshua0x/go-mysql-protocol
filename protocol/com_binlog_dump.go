@@ -19,8 +19,6 @@ func EncodeBinlogDump(serverID uint64, binlogPosition uint64, binlogFileName str
 	tmp = 0x00
 	buf = append(buf, byte(tmp & 0xFF))
 	buf = append(buf, byte((tmp >> 8) & 0xFF))
-	buf = append(buf, byte((tmp >> 16) & 0xFF))
-	buf = append(buf, byte((tmp >> 24) & 0xFF))
 
 
 	//从服务器ID
@@ -29,7 +27,7 @@ func EncodeBinlogDump(serverID uint64, binlogPosition uint64, binlogFileName str
 	buf = append(buf, byte((serverID >> 16) & 0xFF))
 	buf = append(buf, byte((serverID >> 24) & 0xFF))
 
-	buf = util.WriteWithLength(buf, []byte(binlogFileName))
+	buf = util.WriteBytes(buf, []byte(binlogFileName))
 
 	return buf
 }

@@ -9,35 +9,35 @@ func ReadByte(buff []byte, cursor int) (int, byte) {
 }
 
 func ReadUB2(buff []byte, cursor int) (int, uint16) {
-	i := uint16(buff[cursor] & 0xFF)
-	i |= uint16(buff[cursor + 1] & 0xFF) << 8
-	return cursor + 2, uint16(i)
+	i := uint16(buff[cursor])
+	i |= uint16(buff[cursor + 1]) << 8
+	return cursor + 2, i
 }
 
 func ReadUB3(buff []byte, cursor int) (int, uint32) {
-	i := uint32(buff[cursor] & 0xFF)
-	i |= uint32((buff[cursor + 1] & 0xFF) << 8)
-	i |= uint32((buff[cursor + 2] & 0xFF) << 16)
+	i := uint32(buff[cursor])
+	i |= uint32(buff[cursor + 1]) << 8
+	i |= uint32(buff[cursor + 2]) << 16
 	return cursor + 3, i
 }
 
 func ReadUB4(buff []byte, cursor int) (int, uint32) {
-	i := uint32(buff[cursor] & 0xFF)
-	i |= uint32((buff[cursor + 1] & 0xFF) << 8)
-	i |= uint32((buff[cursor + 2] & 0xFF) << 16)
-	i |= uint32((buff[cursor + 3] & 0xFF) << 24)
+	i := uint32(buff[cursor])
+	i |= uint32(buff[cursor + 1]) << 8
+	i |= uint32(buff[cursor + 2]) << 16
+	i |= uint32(buff[cursor + 3]) << 24
 	return cursor + 4, i
 }
 
 func ReadUB8(buff []byte, cursor int) (int, uint64) {
-	i := uint64(buff[cursor] & 0xFF)
-	i |= uint64((buff[cursor + 1] & 0xFF) << 8)
-	i |= uint64((buff[cursor + 2] & 0xFF) << 16)
-	i |= uint64((buff[cursor + 3] & 0xFF) << 24)
-	i |= uint64((buff[cursor + 4] & 0xFF) << 32)
-	i |= uint64((buff[cursor + 5] & 0xFF) << 40)
-	i |= uint64((buff[cursor + 6] & 0xFF) << 48)
-	i |= uint64((buff[cursor + 7] & 0xFF) << 56)
+	i := uint64(buff[cursor])
+	i |= uint64(buff[cursor + 1]) << 8
+	i |= uint64(buff[cursor + 2]) << 16
+	i |= uint64(buff[cursor + 3]) << 24
+	i |= uint64(buff[cursor + 4]) << 32
+	i |= uint64(buff[cursor + 5]) << 40
+	i |= uint64(buff[cursor + 6]) << 48
+	i |= uint64(buff[cursor + 7]) << 56
 	return cursor + 8, i
 }
 
@@ -60,6 +60,11 @@ func ReadLength(buff []byte, cursor int) (int, uint64) {
 		return cursor, uint64(length)
 
 	}
+}
+
+func ReadString(buff []byte, cursor int) (int, string) {
+	cursor, tmp := ReadBytes(buff, cursor, len(buff) - cursor)
+	return cursor, string(tmp)
 }
 
 func ReadLengthString(buff []byte, cursor int) (int, string) {
