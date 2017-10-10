@@ -5,16 +5,16 @@ import (
 	"go-mysql-protocol/util"
 )
 
-func EncodeRegisterSlave(conn net.Conn, dbIP string, dbPort int, dbName string, dbPass string) []byte {
+func EncodeRegisterSlave(conn net.Conn, dbIP string, dbPort int, dbName string, dbPass string, serverID uint64) []byte {
 	buf := []byte{}
 
 	buf = append(buf, 0x15)
 
 	//从服务器ID
-	buf = append(buf, 0xFF)
-	buf = append(buf, 0xFF)
-	buf = append(buf, 0xFF)
-	buf = append(buf, 0)
+	buf = append(buf, byte(serverID & 0xFF))
+	buf = append(buf, byte((serverID >> 8) & 0xFF))
+	buf = append(buf, byte((serverID >> 16) & 0xFF))
+	buf = append(buf, byte((serverID >> 24) & 0xFF))
 
 	//主服务器IP
 	buf = util.WriteLength(buf, int64(len(dbIP)))

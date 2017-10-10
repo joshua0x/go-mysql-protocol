@@ -34,7 +34,7 @@ func ReadPacket(conn net.Conn) (uint32, byte, []byte) {
 		return 0, 0, nil
 	}
 
-	fmt.Printf("socket read: %d %d\n", headerBuf, bodyBuf)
+	//fmt.Printf("socket read: %d %d\n", headerBuf, bodyBuf)
 	return bodySize, sequence, bodyBuf
 }
 
@@ -48,6 +48,6 @@ func WritePacket(conn net.Conn, sequence byte, buf []byte) {
 	for _,v := range buf  {
 		s = append(s, v)
 	}
-	fmt.Printf("socket send: %d\n", s)
+	//fmt.Printf("socket send: %d\n", s)
 	conn.Write(s)
 }

@@ -6,10 +6,13 @@ import (
 	"fmt"
 	"go-mysql-protocol/util"
 	"os"
+	"strconv"
+	"time"
 )
 
 func main() {
 	var ret, tmp, body []byte
+	var serverID uint64 = 0xFFFFFF
 	//建立连接
 	conn := socket.GetSocket("127.0.0.1", 3306)
 
@@ -32,7 +35,7 @@ func main() {
 	}
 
 	//发送注册从库请求
-	ret = protocol.EncodeRegisterSlave(conn, "127.0.0.1", 3306, "root", "MhxzKhl")
+	ret = protocol.EncodeRegisterSlave(conn, "127.0.0.1", 3306, "root", "MhxzKhl", serverID)
 	socket.WritePacket(conn, 0, ret)
 	//读取注册结果
 	_, _, body = socket.ReadPacket(conn)
@@ -45,41 +48,30 @@ func main() {
 	}
 
 	//发送命令，查看binlog信息
-	tmp = protocol.EncodeQuery("show master status;")
+	tmp = protocol.EncodeQuery("show master status")
 	socket.WritePacket(conn, 0, tmp)
 
+	rs := protocol.DecodeResultSet(conn)
+	binlogFileName := rs.Data[0].Data[0]
+	binlogPosition := rs.Data[0].Data[1]
+
+	p, _ := strconv.Atoi(binlogPosition)
+	body = protocol.EncodeBinlogDump(serverID, uint64(p), binlogFileName)
+	fmt.Println(string(body))
+	socket.WritePacket(conn, 0, body)
+
 	for ; ;  {
 		_, _, body = socket.ReadPacket(conn)
-		if body[0] == 0xFF {
-			break
-		}
-		if body[0] == 0xFE {
-			break
-		}
-
-		//读取result header
-		_, _, body = socket.ReadPacket(conn)
-		//目录名称
-		f := protocol.DecodeField(body)
-		fmt.Printf("field: %+v\n", f)
-	}
-
-
-
-
-	/**
-	ret = protocol.EncodeBinlogDump()
-	socket.WritePacket(conn, 0, ret)
-	for ; ;  {
-		_, _, ret = socket.ReadPacket(conn)
-		if ret == nil {
+		if len(body) <= 0 {
+			time.Sleep(1000000000)
+			fmt.Print(".")
 			continue
 		}
-
-		if ret[0] == 0xFF {
-			e := protocol.DecodeError(ret)
-			fmt.Printf("%+v\n", e)
+		if body[0] == 0xFF {
+			fmt.Println(string(body))
+			break
+		} else {
+			fmt.Println(string(body))
 		}
 	}
-	**/
 }
