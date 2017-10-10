@@ -44,6 +44,30 @@ func main() {
 		util.WriteNoticeLog("register slave success")
 	}
 
+	//发送命令，查看binlog信息
+	tmp = protocol.EncodeQuery("show master status;")
+	socket.WritePacket(conn, 0, tmp)
+
+	for ; ;  {
+		_, _, body = socket.ReadPacket(conn)
+		if body[0] == 0xFF {
+			break
+		}
+		if body[0] == 0xFE {
+			break
+		}
+
+		//读取result header
+		_, _, body = socket.ReadPacket(conn)
+		//目录名称
+		f := protocol.DecodeField(body)
+		fmt.Printf("field: %+v\n", f)
+	}
+
+
+
+
+	/**
 	ret = protocol.EncodeBinlogDump()
 	socket.WritePacket(conn, 0, ret)
 	for ; ;  {
@@ -57,5 +81,5 @@ func main() {
 			fmt.Printf("%+v\n", e)
 		}
 	}
-
+	**/
 }
