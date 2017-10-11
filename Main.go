@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 	"go-mysql-protocol/common"
-	"go-mysql-protocol/helper"
 )
 
 func main() {
@@ -49,8 +48,6 @@ func main() {
 		util.WriteNoticeLog("register slave success")
 	}
 
-	mapTbCln := helper.GetTableInfo(conn)
-
 	//发送命令，查看binlog信息
 	tmp = protocol.EncodeQuery("show master status")
 	socket.WritePacket(conn, 0, tmp)
@@ -72,7 +69,8 @@ func main() {
 	_, _, body = socket.ReadPacket(conn)
 	protocol.DecodeFormatDescription(body)
 
-	var eTableMap protocol.EventTableMap
+	var mapEventTableMap map[uint64]protocol.EventTableMap
+	mapEventTableMap = make(map[uint64]protocol.EventTableMap, 0)
 	for ; ;  {
 		var bodySize uint32
 		bodySize, _, body = socket.ReadPacket(conn)
@@ -87,25 +85,18 @@ func main() {
 		eventHeader := protocol.DecodeEventHeader(body)
 		switch eventHeader.EventType {
 		case common.EVENT_TABLE_MAP:
-			eTableMap = protocol.DecodeEventTableMap(body)
-			fmt.Println(mapTbCln[eTableMap.Body.TableName])
-
+			eTableMap := protocol.DecodeEventTableMap(body)
+			mapEventTableMap[eTableMap.Body.TableID] = eTableMap
+			fmt.Printf("EVENT_TABLE_MAP: %+v\n", eTableMap)
 			break
 		case common.EVENT_WRITE_ROWS:
-			fmt.Println("event_write_rows: ", string(body))
-			fmt.Printf("event_write_rows: %d\n", body)
+			protocol.DecodeEventWriteRows(body)
 			break
 		case common.EVENT_UPDATE_ROWS:
-			fmt.Println("event_update_rows: ", string(body))
-			fmt.Printf("event_update_rows: %d\n", body)
 			break
 		case common.EVENT_DELETE_ROWS:
-			fmt.Println("event_delete_rows: ", string(body))
-			fmt.Printf("event_delete_rows: %d\n", body)
 			break
 		case common.EVENT_QUERY:
-			fmt.Println("event_query: ", string(body))
-			fmt.Printf("event_query: %d\n", body)
 			break
 		}
 	}

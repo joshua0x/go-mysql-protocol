@@ -1,6 +1,9 @@
 package util
 
 func ReadBytes(buff []byte, cursor int, offset int) (int, []byte) {
+	if offset <= 0 {
+		return cursor, nil
+	}
 	return cursor + offset, buff[cursor:cursor + offset]
 }
 
@@ -27,6 +30,16 @@ func ReadUB4(buff []byte, cursor int) (int, uint32) {
 	i |= uint32(buff[cursor + 2]) << 16
 	i |= uint32(buff[cursor + 3]) << 24
 	return cursor + 4, i
+}
+
+func ReadUB6(buff []byte, cursor int) (int, uint64) {
+	i := uint64(buff[cursor])
+	i |= uint64(buff[cursor + 1]) << 8
+	i |= uint64(buff[cursor + 2]) << 16
+	i |= uint64(buff[cursor + 3]) << 24
+	i |= uint64(buff[cursor + 4]) << 32
+	i |= uint64(buff[cursor + 5]) << 40
+	return cursor + 6, i
 }
 
 func ReadUB8(buff []byte, cursor int) (int, uint64) {
@@ -90,4 +103,33 @@ func ReadWithNull(buff []byte, cursor int) (int, []byte) {
 		}
 	}
 	return cursor, ret
+}
+
+func ReadBitSet(buff []byte, cursor int, length int, bigEndian bool) (int, []int) {
+	var tmp []byte
+
+	length 		= (length + 7) >> 3
+	cursor, tmp = ReadBytes(buff, cursor, length)
+	if bigEndian == false {
+		tmp 	= ByteReverse(tmp)
+	}
+
+	ret := []int{}
+	for i := 0; i < length; i++  {
+		if (tmp[i >> 3] & (1 << uint(i % 8))) != 0 {
+			ret = append(ret, i)
+		}
+	}
+	return cursor, ret
+}
+
+func ByteReverse(buff []byte) []byte {
+	length := len(buff)
+	if length <= 1 {
+		 return buff
+	}
+	for i := 0; i < length / 2; i++  {
+		buff[i], buff[length - i] = buff[length - i], buff[i]
+	}
+	return buff
 }

@@ -17,6 +17,40 @@ const EVENT_UPDATE_ROWS = 31
 const EVENT_DELETE_ROWS = 32
 const EVENT_QUERY = 2
 
+const COLUMN_TYPE_DECIMAL = 0
+const COLUMN_TYPE_TINY = 1
+const COLUMN_TYPE_SHORT = 2
+const COLUMN_TYPE_LONG = 3
+const COLUMN_TYPE_FLOAT = 4
+const COLUMN_TYPE_DOUBLE = 5
+const COLUMN_TYPE_NULL = 6
+const COLUMN_TYPE_TIMESTAMP = 7
+const COLUMN_TYPE_LONGLONG = 8
+const COLUMN_TYPE_INT24 = 9
+const COLUMN_TYPE_DATE = 10
+const COLUMN_TYPE_TIME = 11
+const COLUMN_TYPE_DATETIME = 12
+const COLUMN_TYPE_YEAR = 13
+const COLUMN_TYPE_NEWDATE = 14
+const COLUMN_TYPE_VARCHAR = 15
+const COLUMN_TYPE_BIT = 16
+// (TIMESTAMP|DATETIME|TIME)_V2 data types appeared in MySQL 5.6.4
+// @see http://dev.mysql.com/doc/internals/en/date-and-time-data-type-representation.html
+const COLUMN_TYPE_TIMESTAMP_V2 = 17
+const COLUMN_TYPE_DATETIME_V2 = 18
+const COLUMN_TYPE_TIME_V2 = 19
+const COLUMN_TYPE_JSON = 245
+const COLUMN_TYPE_NEWDECIMAL = 246
+const COLUMN_TYPE_ENUM = 247
+const COLUMN_TYPE_SET = 248
+const COLUMN_TYPE_TINY_BLOB = 249
+const COLUMN_TYPE_MEDIUM_BLOB = 250
+const COLUMN_TYPE_LONG_BLOB = 251
+const COLUMN_TYPE_BLOB = 252
+const COLUMN_TYPE_VAR_STRING = 253
+const COLUMN_TYPE_STRING = 254
+const COLUMN_TYPE_GEOMETRY = 255
+
 /***************************************************/
 // https://dev.mysql.com/doc/internals/en/command-phase.html
 // include/my_command.h
