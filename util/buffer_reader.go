@@ -1,5 +1,9 @@
 package util
 
+import (
+	"github.com/willf/bitset"
+)
+
 func ReadBytes(buff []byte, cursor int, offset int) (int, []byte) {
 	if offset <= 0 {
 		return cursor, nil
@@ -105,31 +109,16 @@ func ReadWithNull(buff []byte, cursor int) (int, []byte) {
 	return cursor, ret
 }
 
-func ReadBitSet(buff []byte, cursor int, length int, bigEndian bool) (int, []int) {
-	var tmp []byte
-
-	length 		= (length + 7) >> 3
-	cursor, tmp = ReadBytes(buff, cursor, length)
+func ReadBitSet(buff []byte, cursor int, length int, bigEndian bool) (int, bitset.BitSet) {
+	cursor, bytes := ReadBytes(buff, cursor, (length + 7) >> 3)
 	if bigEndian == false {
-		tmp 	= ByteReverse(tmp)
+		bytes = ByteReverse(bytes)
 	}
-
-	ret := []int{}
-	for i := 0; i < length; i++  {
-		if (tmp[i >> 3] & (1 << uint(i % 8))) != 0 {
-			ret = append(ret, i)
+	var bs bitset.BitSet
+	for i := 0; i < length; i++ {
+		if (bytes[i >> 3] & (1 << (uint(i) % 8))) != 0 {
+			bs.Set(uint(i))
 		}
 	}
-	return cursor, ret
-}
-
-func ByteReverse(buff []byte) []byte {
-	length := len(buff)
-	if length <= 1 {
-		 return buff
-	}
-	for i := 0; i < length / 2; i++  {
-		buff[i], buff[length - i] = buff[length - i], buff[i]
-	}
-	return buff
+	return cursor, bs
 }

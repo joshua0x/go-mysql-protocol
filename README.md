@@ -3,6 +3,10 @@
 ## 简介 ##
 没啥，随便写写，目前仅仅是为了实现mysql协议而已，以后可能会基于此做mysql中间件
 
+## 依赖 ##
+Mysql Event 解析的时候用到了BitSet，为了方便，我们直接使用开源库，不在自己写，使用方法为：
+go get github.com/willf/bitset
+
 ## 进度 ##
 ##### 2017.09.30 #####
 * 完成util,common包的代码coding

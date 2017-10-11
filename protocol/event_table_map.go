@@ -3,6 +3,7 @@ package protocol
 import (
 	"go-mysql-protocol/util"
 	"go-mysql-protocol/common"
+	"github.com/willf/bitset"
 )
 
 type EventTableMapBody struct {
@@ -13,7 +14,7 @@ type EventTableMapBody struct {
 	ColumnTypes []byte
 	MetaDataLength uint64
 	ColumnMetaData []uint32
-	ColumnNullability []int
+	ColumnNullability bitset.BitSet
 }
 
 type EventTableMap struct {

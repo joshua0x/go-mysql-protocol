@@ -3,12 +3,13 @@ package protocol
 import (
 	"go-mysql-protocol/util"
 	//"fmt"
+	"github.com/willf/bitset"
 )
 
 type EventWriteRowsBody struct {
 	TableID uint64
 	ColumnNum uint64
-	BitSet []int
+	BitSet bitset.BitSet
 }
 
 type EventWriteRows struct {
