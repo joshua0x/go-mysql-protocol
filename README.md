@@ -4,7 +4,21 @@
 没啥，随便写写，目前仅仅是为了实现mysql协议而已，以后可能会基于此做mysql中间件
 
 ## 进度 ##
-目前仅仅是开发阶段，还在coding，有兴趣的可以一起。 947847775@qq.com
+##### 2017.09.30 #####
+* 完成util,common包的代码coding
+* 完成HandsharkPacket解析
+
+##### 2017.10.11 #####
+* 完成AuthPacket解析
+* 完成RegisterSlavePacket解析
+* 完成ResultSetPacket、ResultHeader、Field解析
+* 完成OKPacket解析
+* 完成TABLE_MAP_EVENT解析
+
+##### 下一步 #####
+* 完成WRITE_ROWS_EVENT解析
+* 完成UPDATE_ROWS_EVENT解析
+* 完成DELETE_ROWS_EVENT解析
 
 ## 规划 ##
 由于本人还在上班，总目标2017年底完成
